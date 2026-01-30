@@ -3,6 +3,7 @@
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL_timer.h>
 #include <stdbool.h>
+#include <math.h>
 
 typedef struct Vec
 {
@@ -53,6 +54,34 @@ Vec ApplyMetricTensor (Vec vector)
   return auxVector;
 }
 
+Vec SetInitialVelocity()
+{
+  float initialSpacialVelocity;
+  float gamma;
+  printf("spacial velocity: ");
+  scanf("%f", &initialSpacialVelocity);
+  gamma = 1 / sqrt(1 - pow(initialSpacialVelocity, 2));
+  Vec fourVelocity = {gamma, gamma * initialSpacialVelocity};
+  return fourVelocity;
+}
+
+Vec SetInitialAcceleration(Vec fourVelocity)
+{
+  float properAcceleration;
+  printf("proper acceleration: ");
+  scanf("%f", &properAcceleration);
+  Vec fourAcceleration = {properAcceleration * fourVelocity.xComponent, properAcceleration * fourVelocity.tComponent};
+  return fourAcceleration;
+}
+
+Vec SetInitialRelativePosition()
+{
+  Vec fourPosition = {0.0, 0.0};
+  printf("spacial position: ");
+  scanf("%f", &fourPosition.xComponent);
+  return fourPosition;
+}
+
 
 int main()
 {
@@ -63,15 +92,13 @@ int main()
 
   int windowWidth = 2080, windowHeight = 940, windowFlag = SDL_WINDOW_RESIZABLE;
 
-  Vec initialVelocity = {1.0, 0.0};
-  Vec initialRelativePosition = {0.0, 0.0};
-  Vec initialAcceleration = {0.0, 0.05};
-
-  Vec velocity = initialVelocity;
-  Vec acceleration = initialAcceleration;
-  Vec relativePosition = initialRelativePosition;
+  Vec velocity = SetInitialVelocity();
+  Vec acceleration = SetInitialAcceleration(velocity);
+  Vec relativePosition = SetInitialRelativePosition();
+  
   Vec realPosition = {relativePosition.tComponent + windowHeight/2, relativePosition.xComponent + windowWidth/2};
-  float timeIncrement = 0.005;
+  
+  float timeIncrement = 0.05;
   
   M2x2 lambdaMatrix = AuxM2x2(acceleration, velocity, timeIncrement);
   printf("%f %f %f %f\n", lambdaMatrix.m00, lambdaMatrix.m01, lambdaMatrix.m10, lambdaMatrix.m11);
@@ -111,15 +138,15 @@ int main()
 
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderPoint(renderer, referenceLineX, referenceLineT);
-    referenceLineX += timeIncrement * 5;
-    referenceLineT -= timeIncrement * 5;
+    referenceLineX += timeIncrement * 10;
+    referenceLineT -= timeIncrement * 10;
 
     SDL_RenderPresent(renderer);
     velocity = VecM2x2Multiplication(velocity, lambdaMatrix);
     acceleration = VecM2x2Multiplication(acceleration, lambdaMatrix);
     lambdaMatrix = AuxM2x2(acceleration, velocity, timeIncrement);
-    realPosition.xComponent = realPosition.xComponent + velocity.xComponent * timeIncrement * 15;
-    realPosition.tComponent = realPosition.tComponent - velocity.tComponent * timeIncrement * 15;
+    realPosition.xComponent = realPosition.xComponent + velocity.xComponent * timeIncrement * 10;
+    realPosition.tComponent = realPosition.tComponent - velocity.tComponent * timeIncrement * 10;
   }
 
   SDL_DestroyRenderer(renderer);
