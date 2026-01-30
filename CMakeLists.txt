@@ -8,3 +8,4 @@ add_subdirectory(SDL EXCLUDE_FROM_ALL)
 add_executable(simulation simulation.c)
 
 target_link_libraries(simulation PRIVATE SDL3::SDL3)
+target_link_libraries(simulation PRIVATE m)
